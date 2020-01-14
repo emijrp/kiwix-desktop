@@ -11,31 +11,25 @@
 #include <QPrinter>
 #include <QPrintDialog>
 #include <thread>
-
-kiwix::Downloader* createDownloader() {
-    int attempt = 5;
-    while(attempt--) {
-        try {
-            return new kiwix::Downloader();
-        } catch (exception& e) {
-            qInfo() << "Cannot create downloader" << e.what();
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        }
-    }
-    return nullptr;
-}
+#include <QMessageBox>
 
 KiwixApp::KiwixApp(int& argc, char *argv[])
     : QApplication(argc, argv),
       m_settingsManager(),
       m_libraryDirectory(findLibraryDirectory()),
       m_library(),
-      mp_downloader(createDownloader()),
-      m_manager(&m_library, mp_downloader),
+      mp_downloader(nullptr),
       mp_server(new kiwix::KiwixServe(
         appendToDirectory(m_libraryDirectory.toStdString(),"library.xml"),
         m_settingsManager.getKiwixServerPort()))
 {
+    try {
+        mp_downloader = new kiwix::Downloader();
+    } catch (exception& e) {
+        QMessageBox::critical(nullptr, tr("Cannot create downloader"),
+        tr("Impossible to launch downloader, Kiwix-desktop will start but all download functions will not working !<br><br>") + e.what());
+    }
+    mp_manager = new ContentManager(&m_library, mp_downloader);
     m_qtTranslator.load(QLocale(), "qt", "_",
                         QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     installTranslator(&m_qtTranslator);
@@ -91,18 +85,14 @@ KiwixApp::KiwixApp(int& argc, char *argv[])
     createAction();
     mp_mainWindow = new MainWindow;
     mp_tabWidget = mp_mainWindow->getTabBar();
-    mp_tabWidget->setContentManagerView(m_manager.getView());
+    mp_tabWidget->setContentManagerView(mp_manager->getView());
     mp_tabWidget->setNewTabButton();
-    mp_mainWindow->getSideContentManager()->setContentManager(&m_manager);
+    mp_mainWindow->getSideContentManager()->setContentManager(mp_manager);
     setSideBar(CONTENTMANAGER_BAR);
     postInit();
 
     mp_errorDialog = new QErrorMessage(mp_mainWindow);
     mp_mainWindow->show();
-    if (!mp_downloader) {
-        showMessage("Impossible to launch downloader<br><br>Aria2 launch command : " + QString::fromStdString(mp_downloader->getAria2LaunchCmd()));
-        mpa_actions[ExitAction]->trigger();
-    }
 }
 
 KiwixApp::~KiwixApp()
@@ -114,6 +104,9 @@ KiwixApp::~KiwixApp()
     if (mp_downloader) {
         mp_downloader->close();
         delete mp_downloader;
+    }
+    if (mp_manager) {
+        delete mp_manager;
     }
     delete mp_errorDialog;
     delete mp_mainWindow;
