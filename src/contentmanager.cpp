@@ -217,12 +217,13 @@ QString ContentManager::downloadBook(const QString &id)
     return QString::fromStdString(download->getDid());
 }
 
-void ContentManager::eraseBookFilesFromComputer(const QString fileToRemove)
+void ContentManager::eraseBookFilesFromComputer(const QString bookPath)
 {
-    QString dirName = KiwixApp::instance()->getLibraryDirectory();
-    QDir dir(dirName, fileToRemove);
-    for(const QString& filename: dir.entryList()) {
-        dir.remove(filename);
+    QString dirName = QString::fromStdString(removeLastPathElement(bookPath.toStdString()));
+    QString filename = QString::fromStdString(getLastPathElement(bookPath.toStdString()));
+    QDir dir(dirName, filename);
+    for(const QString& file: dir.entryList()) {
+        dir.remove(file);
     }
 }
 
@@ -239,7 +240,7 @@ void ContentManager::eraseBook(const QString& id)
         }
     }
     kiwix::Book book = mp_library->getBookById(id);
-    QString fileToRemove = QString::fromUtf8(getLastPathElement(book.getPath()).c_str()) + "*";
+    QString fileToRemove = QString::fromUtf8(book.getPath().c_str()) + "*";
     eraseBookFilesFromComputer(fileToRemove);
     mp_library->removeBookFromLibraryById(id);
     mp_library->save();
@@ -275,7 +276,7 @@ void ContentManager::cancelBook(const QString& id)
     if (download->getStatus() != kiwix::Download::K_COMPLETE) {
         download->cancelDownload();
     }
-    QString fileToRemove = QString::fromUtf8(getLastPathElement(download->getPath()).c_str()) + "*";
+    QString fileToRemove = QString::fromUtf8(download->getPath().c_str()) + "*";
     eraseBookFilesFromComputer(fileToRemove);
     mp_library->removeBookFromLibraryById(id);
     mp_library->save();
