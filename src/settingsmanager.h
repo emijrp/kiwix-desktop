@@ -10,6 +10,7 @@ class SettingsManager : public QObject
     Q_OBJECT
     Q_PROPERTY(int kiwixServerPort READ getKiwixServerPort NOTIFY portChanged)
     Q_PROPERTY(qreal zoomFactor READ getZoomFactor NOTIFY zoomChanged)
+    Q_PROPERTY(QString downloadPath READ getDownloadPath NOTIFY downloadPathChanged)
 
 public:
     explicit SettingsManager(QObject *parent = nullptr);
@@ -28,6 +29,10 @@ public slots:
     int getKiwixServerPort() { return m_kiwixServerPort; };
     void setZoomFactor(qreal zoomFactor);
     qreal getZoomFactor() { return m_zoomFactor; };
+    bool setDownloadPath(QString downloadPath);
+    QString getDownloadPath() { return m_downloadPath; }
+    void resetDownloadPath();
+    void browseDownloadPath();
 
 private:
     void initSettings();
@@ -35,12 +40,14 @@ private:
 signals:
     void portChanged(int port);
     void zoomChanged(qreal zoomFactor);
+    void downloadPathChanged(QString downloadPath);
 
 private:
     QSettings m_settings;
     bool m_settingsViewDisplayed;
     int m_kiwixServerPort;
     qreal m_zoomFactor;
+    QString m_downloadPath;
 };
 
 #endif // SETTINGSMANAGER_H

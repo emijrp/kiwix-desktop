@@ -24,6 +24,22 @@ html, body {
 
 input {
     width: 80px;
+    margin: 5px;
+}
+
+input[type=button] {
+    width: 65px;
+    color: blue;
+    font-weight: bold;
+    font-size: 14px;
+    border: 0;
+    background: transparent;
+    border-radius: 2px;
+}
+
+input[type=button]:hover {
+    color: white;
+    background: blue;
 }
 
 input[type=number]::-webkit-inner-spin-button,

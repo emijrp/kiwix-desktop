@@ -1,3 +1,7 @@
+function onDownloadPathChanged (downloadPath) {
+    app.downloadPath = downloadPath;
+}
+
 function init() {
     new QWebChannel(qt.webChannelTransport, function(channel) {
       settingsManager = channel.objects.settingsManager;
@@ -7,6 +11,7 @@ function init() {
           settingsManager: settingsManager,
           kiwixServerPort: settingsManager.kiwixServerPort,
           zoomFactor: Math.floor(settingsManager.zoomFactor * 100),
+          downloadPath: settingsManager.downloadPath,
         },
         methods: {
             setPort : function() {
@@ -23,8 +28,23 @@ function init() {
                 this.zoomFactor = (this.zoomFactor < 30) ? 30 : this.zoomFactor;
                 this.zoomFactor = (this.zoomFactor > 500) ? 500 : this.zoomFactor;
                 settingsManager.setZoomFactor(this.zoomFactor / 100);
+            },
+            setDownloadPath : function() {
+                settingsManager.setDownloadPath(this.downloadPath, function(success) {
+                    if (!success) {
+                        alert("invalid path");
+                        onDownloadPathChanged(settingsManager.downloadPath);
+                    }
+                });
+            },
+            resetDownloadPath : function() {
+                settingsManager.resetDownloadPath();
+            },
+            browseDownloadPath : function() {
+                settingsManager.browseDownloadPath();
             }
         }
       });
+      settingsManager.downloadPathChanged.connect(onDownloadPathChanged)
     });
 }

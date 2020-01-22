@@ -17,6 +17,12 @@
         <label>Zoom level : </label>
         <div class="percentage-symbol"><input type="number" step="10" min="30" max="500" v-model="zoomFactor" v-on:change="setZoomFactor()"></div>
     </div>
+    <div class="row">
+        <label>Download path : </label>
+        <input style="flex: 1;" type="text" v-model="downloadPath" v-on:change="setDownloadPath()">
+        <input type="button" value="Reset" v-on:click="resetDownloadPath()">
+        <input type="button" value="Browse" v-on:click="browseDownloadPath()">
+    </div>
 </div>
 </body></html>
  
