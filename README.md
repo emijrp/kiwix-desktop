@@ -109,5 +109,4 @@ LD_LIBRARY_PATH="<...>/BUILD_native_dyn/INSTALL/lib/x86_64-linux-gnu"
 License
 -------
 
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0) or later, see
-[LICENSE](LICENSE) for more details.
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0) or later, see [LICENSE](LICENSE) for more details.
